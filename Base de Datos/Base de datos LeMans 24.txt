@@ -1,0 +1,534 @@
+create table categoria
+(
+id	SERIAL PRIMARY KEY,
+nombre varchar (50) NOT NULL,
+fecha_inicial DATE NOT NULL,
+fecha_final DATE,
+descripcion varchar(100)
+);
+
+create table tramo_pista
+(
+fecha_inicial DATE NOT NULL,
+km_distancia_inicial smallint NOT NULL,
+km_distancia_final smallint NOT NULL,
+nombre varchar (50) NOT NULL,
+zona_de_boxes BOOLEAN NOT NULL,
+fecha_final DATE,
+porcentaje_dificultad_curva integer ,
+
+CONSTRAINT pk_contrato PRIMARY key (fecha_inicial, km_distancia_inicial,km_distancia_final)
+	
+);
+
+create table evento
+(
+id SERIAL PRIMARY KEY,
+hora_inicio time NOT NULL,
+fecha_inicio Date NOT NULL,
+tipo varchar(20),
+edicion integer NOT NULL,
+motivo_cancelacion varchar(100)
+
+);
+
+
+create table patrocinador
+(
+id SERIAL PRIMARY KEY,
+nombre varchar(50) NOT NULL,
+descripcion varchar(100)
+);
+
+create table pais
+(
+id SERIAL PRIMARY KEY,
+nombre varchar(50) NOT NULL,
+nacionalidad varchar(50) NOT NULL,
+foto BYTEA NOT NULL
+);
+
+create table tramo_evento
+(
+fecha_inicial DATE NOT NULL,
+km_distancia_inicial smallint NOT NULL,
+km_distancia_final smallint NOT NULL,
+id_evento smallint NOT NULL,
+
+
+CONSTRAINT pk_tramo_evento PRIMARY key (fecha_inicial, km_distancia_inicial,km_distancia_final, id_evento),
+CONSTRAINT fk_tramo foreign key (fecha_inicial, km_distancia_inicial,km_distancia_final) references tramo_pista (fecha_inicial, km_distancia_inicial,km_distancia_final) ON DELETE CASCADE,
+CONSTRAINT fk_evento foreign key (id_evento) references evento (id) ON DELETE CASCADE
+);
+
+create table condicion_pista
+(
+id SERIAL NOT NULL,
+id_evento smallint NOT NULL,
+clima varchar(30) NOT NULL,
+humedad varchar(30) NOT NULL,
+temperatura integer NOT NULL,
+dia boolean NOT NULL,
+hora_inicial time NOT NULL,
+hora_final time ,
+
+CONSTRAINT pk_condicion_pista PRIMARY key (id,id_evento),
+CONSTRAINT fk_evento foreign key (id_evento) references evento (id) ON DELETE CASCADE
+);
+
+create table empresa
+(
+id SERIAL NOT NULL,
+id_pais smallint NOT NULL,
+nombre varchar(50) NOT NULL,
+descripcion varchar(100) ,
+pagina_web varchar(50)[3],
+
+
+CONSTRAINT pk_condicion PRIMARY key (id),
+CONSTRAINT fk_empresa_pais foreign key (id_pais) references pais (id) ON DELETE CASCADE
+);
+
+create table equipo
+(
+fecha_inicio Date NOT NULL,
+numero smallint NOT NULL,
+id_empresa smallint NOT NULL,
+
+nombre varchar(50) NOT NULL,
+fecha_final Date,
+
+CONSTRAINT pk_equipo PRIMARY key (fecha_inicio,numero),
+CONSTRAINT fk_empresa_equipo foreign key (id_empresa) references empresa (id) ON DELETE CASCADE
+);
+
+
+
+CREATE TYPE neumatico AS (
+tipo_neumatico varchar(30),
+km_desgaste numeric(2,2),
+fecha_fabricacion DATE,
+relacion_altura_anchura varchar(20),
+ancho varchar(20),
+diametro_pulgadas varchar(20),
+codigo_carga varchar(30),
+codigo_velocidad varchar(50)
+);
+
+CREATE TYPE dato_personal AS (
+primer_nombre varchar(50) ,
+segundo_nombre varchar(50),
+primer_apellido varchar(50) ,
+segundo_apellido varchar(50),
+fecha_nacimiento DATE ,
+sexo varchar(15) ,
+lugar_nacimiento varchar(50),
+fecha_fallecimiento DATE
+);
+
+
+
+create table conductor
+(
+id SERIAL NOT NULL,
+id_pais smallint NOT NULL,
+
+primer_nombre varchar(50) NOT NULL,
+segundo_nombre varchar(50),
+primer_apellido varchar(50) NOT NULL,
+segundo_apellido varchar(50),
+fecha_nacimiento DATE  NOT NULL,
+sexo varchar(15)  NOT NULL,
+lugar_nacimiento varchar(50),
+fecha_fallecimiento DATE,	
+	
+	
+	
+	
+foto BYTEA NOT NULL,
+tipo varchar(50) NOT NULL,
+licencia varchar(15) Array[2],
+experiencia text[50][4],
+
+
+CONSTRAINT pk_conductor PRIMARY key (id),
+CONSTRAINT fk_conductor_pais foreign key (id_pais) references pais (id) ON DELETE CASCADE
+);
+
+create table automovil
+(
+id SERIAL NOT NULL,
+
+id_empresa bigint NOT NULL,
+id_categoria bigint NOT NULL,
+
+nombre varchar(50) NOT NULL,
+modelo varchar(50),
+ano Date NOT NULL,
+foto BYTEA NOT NULL,
+peso float,
+longitud integer NOT NULL,
+velocidad_media_maxima integer NOT NULL,
+velocidad_media_minima integer NOT NULL,
+consumo_combustible_km float,
+capacidad_combustible integer NOT NULL,
+capacidad_bebida_conductor float NOT NULL,
+transmision varchar(80),
+chasis varchar(80),
+descripcion_adicional varchar(80),
+color_numero_dorsal varchar(80),
+color_carro varchar(80),
+suspension_delantera varchar(50),
+suspension_trasera varchar(50),
+anchura float,
+carroceria varchar(50),
+distancia_entre_ejes varchar(50),
+
+CONSTRAINT pk_auto PRIMARY key (id),
+CONSTRAINT fk_automovil_empresa foreign key (id_empresa) references empresa (id) ON DELETE CASCADE,
+CONSTRAINT fk_automovil_categoria foreign key (id_categoria) references categoria (id) ON DELETE CASCADE
+
+);
+
+create table pieza
+(
+id SERIAL NOT NULL,
+id_pais int NOT NULL,
+id_empresa int NOT NULL,
+
+nombre varchar(50) NOT NULL,
+tipo varchar(20),
+descripcion varchar(80),
+cantidad integer NOT NULL,
+neumatico neumatico,
+
+
+combustion varchar(40),
+cilindrada varchar(40),
+configuracion varchar(50),
+posicion varchar(40),
+turbo varchar(40),
+potencia varchar(50),
+
+
+
+CONSTRAINT pk_auto_pieza PRIMARY key (id),
+CONSTRAINT fk_automovil_empresa foreign key (id_empresa) references empresa (id) ON DELETE CASCADE
+);
+
+
+
+
+create table pieza_automovil
+(
+id_pieza bigint NOT NULL,
+id_automovil bigint NOT NULL,
+cantidad integer NOT NULL,
+
+CONSTRAINT pk_pieza_automovil PRIMARY key (id_automovil,id_pieza),
+CONSTRAINT fk_pieza_auto foreign key (id_pieza) references pieza (id) ON DELETE CASCADE,
+CONSTRAINT fk_pie_automovil foreign key (id_automovil) references automovil (id) ON DELETE CASCADE
+
+);
+
+
+
+
+
+create table personal_tecnico
+(
+id SERIAL NOT NULL,
+id_pais smallint NOT NULL,
+persona dato_personal,
+especialidad text[50][4],
+
+
+CONSTRAINT pk_personal PRIMARY key (id),
+CONSTRAINT fk_personal_pais foreign key (id_pais) references pais (id) ON DELETE CASCADE
+);
+
+create table equipo_tecnico
+(
+
+fecha_ingreso DATE NOT NULL,
+fecha_final DATE,
+
+fecha_inicio Date NOT NULL,
+numero_equipo bigint NOT NULL,
+	
+
+id_personal bigint NOT NULL,
+
+CONSTRAINT pk_equipo_tecnico PRIMARY key (fecha_ingreso,fecha_inicio,numero_equipo,id_personal),
+CONSTRAINT fk_personal_equipo_pais foreign key (id_personal) references personal_tecnico (id) ON DELETE CASCADE,
+	CONSTRAINT fk_equipo_personal foreign key (fecha_inicio,numero_equipo) references equipo (fecha_inicio,numero) ON DELETE CASCADE
+);
+
+
+create table miembro_patrocinio
+(
+
+fecha_ingreso DATE NOT NULL,
+fecha_final DATE,
+
+fecha_inicio Date NOT NULL,
+numero_equipo bigint NOT NULL,
+id_patrocinador BIGINT NOT NULL,
+
+CONSTRAINT pk_miembro_patrocinio PRIMARY key (fecha_ingreso,fecha_inicio,numero_equipo),
+CONSTRAINT fk_patrocinio_equipo foreign key (id_patrocinador) references patrocinador (id) ON DELETE CASCADE,
+	CONSTRAINT fk_equipo_personal foreign key (fecha_inicio,numero_equipo) references equipo (fecha_inicio,numero) ON DELETE CASCADE
+);
+
+
+create table participante
+(
+
+fecha_ingreso Date NOT NULL,
+fecha_final Date,
+
+fecha_inicio Date NOT NULL,
+numero_equipo bigint NOT NULL,
+
+
+id_automovil bigint NOT NULL,
+
+id_conductor bigint NOT NULL,
+
+
+CONSTRAINT pk_equipo_participante PRIMARY key (fecha_ingreso,fecha_inicio,numero_equipo,
+											  id_automovil,
+											  id_conductor),
+CONSTRAINT fk_equipo_participante foreign key (fecha_inicio,numero_equipo) references equipo (fecha_inicio,numero) ON DELETE CASCADE,
+CONSTRAINT fk_auto_participante foreign key (id_automovil) references automovil (id) ON DELETE CASCADE,
+CONSTRAINT fk_conductor_participante foreign key (id_conductor) references conductor (id) ON DELETE CASCADE
+);
+
+
+CREATE TYPE records AS (
+hora time,
+fecha_inicial DATE,
+velocidad_maxima integer,
+fecha_final DATE,
+descripcion varchar(50)
+);
+
+create table carrera
+(
+numero_vuelta int NOT NULL,	
+posicion_actual smallint NOT NULL,
+tiempo_inicial time NOT NULL,
+tiempo_final time,
+km_recorrido bigint NOT NULL,
+velocidad_media smallint NOT NULL,
+record records,
+
+id_evento bigint NOT NULL,
+
+fecha_ingreso_participante Date NOT NULL,
+
+fecha_inicio Date NOT NULL,
+numero_equipo bigint NOT NULL,
+
+
+id_automovil bigint NOT NULL,
+
+
+id_conductor bigint NOT NULL,
+pasar_por_boxes varchar NOT NULL,
+
+CONSTRAINT pk_carrera PRIMARY key (id_evento,
+								   fecha_ingreso_participante,
+								   fecha_inicio,numero_equipo,
+								  id_automovil,
+								id_conductor),
+CONSTRAINT fk_carrera_evento foreign key (id_evento) references evento (id) ON DELETE CASCADE,
+CONSTRAINT fk_carrera_participante foreign key (fecha_ingreso_participante,
+									fecha_inicio,numero_equipo,
+									id_automovil,
+									id_conductor) references participante (fecha_ingreso,
+																fecha_inicio,numero_equipo,
+											 					id_automovil,
+											  					id_conductor) ON DELETE CASCADE
+);
+
+
+create table carrera_detalle
+(
+numero_vuelta int NOT NULL,	
+posicion_actual smallint NOT NULL,
+tiempo_inicial time NOT NULL,
+tiempo_final time ,
+km_recorrido bigint NOT NULL,
+velocidad_media smallint NOT NULL,
+record records,
+
+id_evento bigint NOT NULL,
+
+fecha_ingreso_participante Date NOT NULL,
+
+fecha_inicio Date NOT NULL,
+numero_equipo bigint NOT NULL,
+
+
+id_automovil bigint NOT NULL,
+
+
+id_conductor bigint NOT NULL,
+pasar_por_boxes varchar NOT NULL,
+
+CONSTRAINT pk_carrera_detalle PRIMARY key (id_evento,numero_vuelta,
+								   fecha_ingreso_participante,
+								   fecha_inicio,numero_equipo,
+								  id_automovil,
+								id_conductor),
+CONSTRAINT fk_carrera_evento_detalle foreign key (id_evento) references evento (id) ON DELETE CASCADE,
+CONSTRAINT fk_carrera_participante_detalle foreign key (fecha_ingreso_participante,
+									fecha_inicio,numero_equipo,
+									id_automovil,
+									id_conductor) references participante (fecha_ingreso,
+																fecha_inicio,numero_equipo,
+											 					id_automovil,
+											  					id_conductor) ON DELETE CASCADE
+);
+			
+
+create table condicion_auto
+(
+
+id SERIAL NOT NULL,
+
+hora_medicion time NOT NULL,
+temperatura_cabina smallint,
+bebida_conductor integer,
+descripcion varchar(50),
+
+
+id_evento bigint NOT NULL,
+
+fecha_ingreso_participante Date NOT NULL,
+
+fecha_inicio Date NOT NULL,
+numero_equipo bigint NOT NULL,
+
+id_pieza bigint,		
+id_automovil bigint,
+atendido boolean,
+
+id_conductor bigint NOT NULL,
+
+CONSTRAINT pk_condicion_auto PRIMARY key (id,id_evento,fecha_ingreso_participante,fecha_inicio,numero_equipo),
+CONSTRAINT fk_condicion_carrera_evento foreign key (id_evento) references evento (id) ON DELETE CASCADE,
+CONSTRAINT fk_condicion_pieza foreign key (id_pieza,id_automovil) references pieza_automovil (id_pieza,id_automovil) ON DELETE CASCADE,
+CONSTRAINT fk_condicion_carrera_participante foreign key (id_evento,fecha_ingreso_participante,
+									fecha_inicio,numero_equipo,
+									id_automovil,
+									id_conductor) references carrera(id_evento,fecha_ingreso_participante,
+																fecha_inicio,numero_equipo,
+											 					id_automovil,
+											  					id_conductor) ON DELETE CASCADE
+);	
+
+
+create table accidente
+(
+
+id bigint NOT NULL,
+
+km_posicion integer NOT NULL,
+hora time NOT NULL,
+tiempo_duracion_slow_zone smallint NOT NULL,
+distancia_slow_zone smallint NOT NULL,
+velocidad_pos_dano smallint,
+descripcion varchar(50),
+
+id_evento bigint NOT NULL,
+
+fecha_ingreso_participante Date NOT NULL,
+
+fecha_inicio Date NOT NULL,
+numero_equipo bigint NOT NULL,
+
+id_automovil bigint NOT NULL,
+
+id_conductor bigint NOT NULL,
+	
+
+CONSTRAINT pk_accidente PRIMARY key (id,id_evento,fecha_ingreso_participante,fecha_inicio,numero_equipo),
+CONSTRAINT fk_accidente_carrera_evento foreign key (id_evento) references evento (id) ON DELETE CASCADE,
+CONSTRAINT fk_accidente_carrera_participante foreign key (id_evento,fecha_ingreso_participante,
+									fecha_inicio,numero_equipo,
+									id_automovil,
+									id_conductor) references carrera(id_evento,fecha_ingreso_participante,
+																fecha_inicio,numero_equipo,
+											 					id_automovil,
+											  					id_conductor) ON DELETE CASCADE
+);			
+
+create table parada
+(
+
+id SERIAL NOT NULL,
+
+hora_inicial time NOT NULL,
+hora_final time,
+litros_agregados_gasolina smallint,
+litros_agregados_piloto smallint,
+
+id_evento bigint NOT NULL,
+
+fecha_ingreso_participante Date NOT NULL,
+
+fecha_inicio Date NOT NULL,
+numero_equipo bigint NOT NULL,
+id_automovil bigint NOT NULL,
+id_conductor bigint NOT NULL,
+
+CONSTRAINT pk_parada PRIMARY key (id,id_evento,fecha_ingreso_participante,fecha_inicio,numero_equipo,id_automovil,id_conductor),
+CONSTRAINT fk_parada_carrera_evento foreign key (id_evento) references evento (id) ON DELETE CASCADE,
+CONSTRAINT fk_parada_carrera_participante foreign key (id_evento,fecha_ingreso_participante,
+									fecha_inicio,numero_equipo,
+									id_automovil,
+									id_conductor) references carrera(id_evento,fecha_ingreso_participante,
+																fecha_inicio,numero_equipo,
+											 					id_automovil,
+											  					id_conductor) ON DELETE CASCADE
+);	
+
+
+create table reparacion
+(
+
+id_parada bigint NOT NULL,
+
+id_pieza bigint,	
+id_automovil bigint,	
+
+
+cantidad smallint NOT NULL,
+descripcion varchar(50),
+
+id_evento bigint NOT NULL,
+
+fecha_ingreso_participante Date NOT NULL,
+
+fecha_inicio Date NOT NULL,
+numero_equipo bigint NOT NULL,
+
+
+
+id_conductor bigint NOT NULL,
+id_conductor_pais bigint NOT NULL,
+
+CONSTRAINT pk_reparacion PRIMARY key (id_parada,id_evento,fecha_ingreso_participante,fecha_inicio,numero_equipo),
+CONSTRAINT fk_reparacion_carrera_evento foreign key (id_evento) references evento (id) ON DELETE CASCADE,
+CONSTRAINT fk_reparacion_condicion_pieza foreign key (id_pieza,id_automovil) references pieza_automovil (id_pieza,id_automovil) ON DELETE CASCADE,
+CONSTRAINT fk_reparacion_carrera_participante foreign key (id_evento,fecha_ingreso_participante,
+									fecha_inicio,numero_equipo,
+									id_automovil,
+									id_conductor) references carrera(id_evento,fecha_ingreso_participante,
+																fecha_inicio,numero_equipo,
+											 					id_automovil,
+											  					id_conductor) ON DELETE CASCADE
+);	
+

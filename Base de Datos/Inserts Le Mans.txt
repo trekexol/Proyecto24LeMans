@@ -1,0 +1,283 @@
+INSERT INTO pais (id,nombre,nacionalidad,foto)
+VALUES (1,'Francia','Frances','foto');
+INSERT INTO pais (id,nombre,nacionalidad,foto)
+VALUES (2,'Luxemburgo','Luxemburgues','foto');
+INSERT INTO pais (id,nombre,nacionalidad,foto)
+VALUES (3,'Belgica','Belga','foto');
+INSERT INTO pais (id,nombre,nacionalidad,foto)
+VALUES (4,'Australia','Australiano','foto');
+INSERT INTO pais (id,nombre,nacionalidad,foto)
+VALUES (5,'Reino Unido','Britanico','foto');
+
+
+
+INSERT INTO conductor (id,id_pais,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,fecha_nacimiento,sexo,lugar_nacimiento,fecha_fallecimiento,foto,tipo,licencia,experiencia)
+VALUES (1,1,'André',null,'Lagache',null,
+	   '21-01-1885','Masculino','Pantin Seine-Saint-Denis 93','02-10-1938',
+		'foto','Oro','{156151}','{experto en manejo}');
+
+INSERT INTO conductor (id,id_pais,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,fecha_nacimiento,sexo,lugar_nacimiento,fecha_fallecimiento,foto,tipo,licencia,experiencia)
+VALUES (2,1,'Rene',null,'Leonard',null,
+	   '23-06-1889','Masculino','Pau Basses Pyrénées','15-08-1965',
+		'foto','Oro','{156151}','{experto en manejo}');
+
+INSERT INTO conductor (id,id_pais,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,fecha_nacimiento,sexo,lugar_nacimiento,fecha_fallecimiento,foto,tipo,licencia,experiencia)
+VALUES (3,5,'Frank',null,'Clement',null,
+	   '15-06-1888','Masculino','Berkhamstead Hertfordshire','15-02-1970',
+		'foto','Oro',null,'{experto en manejo}');
+
+INSERT INTO conductor (id,id_pais,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,fecha_nacimiento,sexo,lugar_nacimiento,fecha_fallecimiento,foto,tipo,licencia,experiencia)
+VALUES (4,5,'John','Francis','Duff',null,
+	   '17-01-1895','Masculino','Jiujiang Kiangsi','08-01-1958',
+		'foto','Oro',null,null);
+INSERT INTO conductor (id,id_pais,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,fecha_nacimiento,sexo,lugar_nacimiento,fecha_fallecimiento,foto,tipo,licencia,experiencia)
+VALUES (5,1,'Andre','Emile','Rossignol',null,
+	   '09-08-1890','Masculino','Paris17ème','05-12-1960',
+		'foto','Oro',null,null);
+
+INSERT INTO conductor (id,id_pais,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,fecha_nacimiento,sexo,lugar_nacimiento,fecha_fallecimiento,foto,tipo,licencia,experiencia)
+VALUES (6,1,'Charles','Henry','De Courcelles',null,
+	   '22-05-1889','Masculino','Paris 9eme','02-07-1927',
+		'foto','Oro',null,null);
+
+INSERT INTO conductor (id,id_pais,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,fecha_nacimiento,sexo,lugar_nacimiento,fecha_fallecimiento,foto,tipo,licencia,experiencia)
+VALUES (7,5,'Francis','Richard','Earl','Howe',
+	   '01-05-1884','Masculino','Mayfair Greater London','01-09-1964',
+		'foto','Oro',null,null);
+
+INSERT INTO conductor (id,id_pais,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,fecha_nacimiento,sexo,lugar_nacimiento,fecha_fallecimiento,foto,tipo,licencia,experiencia)
+VALUES (8,5,'Henry','Ralph','Birkin',null,
+	   '26-07-1896','Masculino','Nottingham Nottinghamshire','22-06-1933',
+		'foto','Oro',null,null);
+
+INSERT INTO conductor (id,id_pais,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,fecha_nacimiento,sexo,lugar_nacimiento,fecha_fallecimiento,foto,tipo,licencia,experiencia)
+VALUES (9,5,'John','Dudley','Benjafield',null,
+	   '06-08-1887','Masculino',null,'20-01-1957',
+		'foto','Oro',null,null);
+
+
+INSERT INTO conductor (id,id_pais,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,fecha_nacimiento,sexo,lugar_nacimiento,fecha_fallecimiento,foto,tipo,licencia,experiencia)
+VALUES (10,5,'Sydney','Charles','Davis',null,
+	   '09-01-1887','Masculino','London Greater London','09-01-1981',
+		'foto','Oro',null,null);
+
+INSERT INTO conductor (id,id_pais,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,fecha_nacimiento,sexo,lugar_nacimiento,fecha_fallecimiento,foto,tipo,licencia,experiencia)
+VALUES (11,4,'Bernard',null,'Rubin',null,
+	   '06-12-1896','Masculino','Carlton Victoria','27-06-1936',
+		'foto','Oro',null,null);
+
+INSERT INTO conductor (id,id_pais,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,fecha_nacimiento,sexo,lugar_nacimiento,fecha_fallecimiento,foto,tipo,licencia,experiencia)
+VALUES (12,5,'Joel','Woolf','Barnato',null,
+	   '27-09-1895','Masculino','Westminster Greater London','27-07-1948',
+		'foto','Oro',null,null);
+
+
+INSERT INTO categoria (id,nombre,fecha_inicial,fecha_final,descripcion)
+VALUES (1,'1001 - 1500','01-01-1923','01-01-1930',null);
+
+INSERT INTO categoria (id,nombre,fecha_inicial,fecha_final,descripcion)
+VALUES (2,'1501 - 2000','01-01-1923','01-01-1930',null);
+
+INSERT INTO categoria (id,nombre,fecha_inicial,fecha_final,descripcion)
+VALUES (3,'2001 - 3000','01-01-1923','31-12-1928',null);
+
+INSERT INTO categoria (id,nombre,fecha_inicial,fecha_final,descripcion)
+VALUES (4,'3001 - 5000','01-01-1923','01-01-1930',null);
+
+INSERT INTO categoria (id,nombre,fecha_inicial,fecha_final,descripcion)
+VALUES (5,'5001 - 8000','01-01-1923','31-12-1923',null);
+
+INSERT INTO categoria (id,nombre,fecha_inicial,fecha_final,descripcion)
+VALUES (6,'751 - 1100','01-01-1923','01-01-1930',null);
+
+INSERT INTO categoria (id,nombre,fecha_inicial,fecha_final,descripcion)
+VALUES (7,'501 - 750','01-01-1925','31-12-1925',null);
+
+INSERT INTO categoria (id,nombre,fecha_inicial,fecha_final,descripcion)
+VALUES (8,'501 - 750','01-01-1929','31-12-1929',null);
+
+
+
+
+INSERT INTO empresa (id,id_pais,nombre,descripcion,pagina_web)
+VALUES (1,1,'Peugeot',null,null);
+
+INSERT INTO empresa (id,id_pais,nombre,descripcion,pagina_web)
+VALUES (2,5,'Bentley',null,null);
+
+
+INSERT INTO empresa (id,id_pais,nombre,descripcion,pagina_web)
+VALUES (3,1,'Lorraine-Dietrich',null,null);
+
+
+INSERT INTO automovil (id,id_empresa,id_categoria,nombre,modelo,ano,foto,peso,longitud,velocidad_media_maxima,velocidad_media_minima,consumo_combustible_km,capacidad_combustible,capacidad_bebida_conductor,transmision,chasis,descripcion_adicional,color_numero_dorsal,color_carro,suspension_delantera,suspension_trasera,anchura,carroceria,distancia_entre_ejes)
+VALUES (1,1,3,'Chenard et Walcker Sport','Sport','05-05-1913','foto',1120,3,120,80,3,50,20,'caja de cambios de cuatro velocidades',null,null,null,'azul',null,null,1.67,null,null);
+
+INSERT INTO automovil (id,id_empresa,id_categoria,nombre,modelo,ano,foto,peso,longitud,velocidad_media_maxima,velocidad_media_minima,consumo_combustible_km,capacidad_combustible,capacidad_bebida_conductor,transmision,chasis,descripcion_adicional,color_numero_dorsal,color_carro,suspension_delantera,suspension_trasera,anchura,carroceria,distancia_entre_ejes)
+VALUES (2,2,3,'Bentley 3 Litros','Deportivo','05-05-1921','foto',1270,4,120,80,3,60,20,null,null,null,null,'azul oscuro',null,null,1,null,'Entre 2743 mm y 3302 mm');
+
+INSERT INTO automovil (id,id_empresa,id_categoria,nombre,modelo,ano,foto,peso,longitud,velocidad_media_maxima,velocidad_media_minima,consumo_combustible_km,capacidad_combustible,capacidad_bebida_conductor,transmision,chasis,descripcion_adicional,color_numero_dorsal,color_carro,suspension_delantera,suspension_trasera,anchura,carroceria,distancia_entre_ejes)
+VALUES (3,3,4,'La Lorraine B3-6','Deportivo','05-05-1924','foto',1500,5,130,80,2,60,25,'Manual de 4 velocidades','cuerpo sobre bastidor de escalera de acero',null,null,'azul claro',null,null,1.7,null,'2.890 mm / 1.400 mm/ 1.400 mm');
+
+INSERT INTO automovil (id,id_empresa,id_categoria,nombre,modelo,ano,foto,peso,longitud,velocidad_media_maxima,velocidad_media_minima,consumo_combustible_km,capacidad_combustible,capacidad_bebida_conductor,transmision,chasis,descripcion_adicional,color_numero_dorsal,color_carro,suspension_delantera,suspension_trasera,anchura,carroceria,distancia_entre_ejes)
+VALUES (4,2,3,'Bentley 4.5 Litros','Deportivo','05-05-1927','foto',1625,4,130,90,2,60,30,'Manual de 4 velocidades',null,null,null,'verde oscuro',null,null,1.74,null,'Estándar: 3048 mm2​ SWB (8 unidades):2984 mm2​');
+
+INSERT INTO automovil (id,id_empresa,id_categoria,nombre,modelo,ano,foto,peso,longitud,velocidad_media_maxima,velocidad_media_minima,consumo_combustible_km,capacidad_combustible,capacidad_bebida_conductor,transmision,chasis,descripcion_adicional,color_numero_dorsal,color_carro,suspension_delantera,suspension_trasera,anchura,carroceria,distancia_entre_ejes)
+VALUES (5,2,3,'Bentley 6.5 Litros','Deportivo','05-05-1928','foto',2130,4,135,90,2,70,30,'Trasera; caja de cambios manual de 4 velocidades no sincronizadas',null,null,null,'negro',null,null,1.74,null,'De 2984 mm a 3302 mm');
+
+
+
+
+INSERT INTO equipo (fecha_inicio,numero,nombre,fecha_final,id_empresa)
+VALUES ('02-02-1923',9,'Chenard et Walcker',null,1);
+
+INSERT INTO equipo (fecha_inicio,numero,nombre,fecha_final,id_empresa)
+VALUES ('27-03-1924',8,'Bentley',null,2);
+
+INSERT INTO equipo (fecha_inicio,numero,nombre,fecha_final,id_empresa)
+VALUES ('27-04-1925',5,'La Lorraine',null,3);
+
+INSERT INTO equipo (fecha_inicio,numero,nombre,fecha_final,id_empresa)
+VALUES ('27-04-1926',6,'La Lorraine',null,3);
+
+INSERT INTO equipo (fecha_inicio,numero,nombre,fecha_final,id_empresa)
+VALUES ('27-01-1927',3,'Bentley',null,2);
+
+INSERT INTO equipo (fecha_inicio,numero,nombre,fecha_final,id_empresa)
+VALUES ('07-01-1929',1,'Bentley',null,2);
+
+
+INSERT INTO participante (fecha_ingreso,fecha_final,fecha_inicio,numero_equipo,id_conductor,id_automovil)
+VALUES ('02-02-1923',null,'02-02-1923',9,1,1);
+
+INSERT INTO participante (fecha_ingreso,fecha_final,fecha_inicio,numero_equipo,id_conductor,id_automovil)
+VALUES ('02-02-1923',null,'02-02-1923',9,2,1);
+
+
+INSERT INTO participante (fecha_ingreso,fecha_final,fecha_inicio,numero_equipo,id_conductor,id_automovil)
+VALUES ('03-02-1923',null,'27-03-1924',8,3,2);
+
+INSERT INTO participante (fecha_ingreso,fecha_final,fecha_inicio,numero_equipo,id_conductor,id_automovil)
+VALUES ('05-02-1925',null,'27-04-1925',5,5,3);
+
+
+INSERT INTO evento (id,hora_inicio,fecha_inicio,tipo,edicion)
+VALUES (1,'14:00:00','17/04/1923','Carrera',1);
+
+
+
+INSERT INTO carrera (numero_vuelta,posicion_actual,tiempo_inicial,tiempo_final,km_recorrido,velocidad_media,
+					 id_evento,fecha_ingreso_participante,fecha_inicio,numero_equipo,
+					 id_automovil,id_conductor,pasar_por_boxes)
+VALUES (0,1,'00:00:00','00:00:10',0,0,1,'02-02-1923','02-02-1923',9,1,2,false);
+
+
+INSERT INTO carrera (numero_vuelta,posicion_actual,tiempo_inicial,tiempo_final,km_recorrido,velocidad_media,
+					 id_evento,fecha_ingreso_participante,fecha_inicio,numero_equipo,
+					 id_automovil,id_conductor,pasar_por_boxes)
+VALUES (0,2,'00:00:00','00:00:10',0,0,1,'03-02-1923','27-03-1924',8,2,3,false);
+
+INSERT INTO carrera (numero_vuelta,posicion_actual,tiempo_inicial,tiempo_final,km_recorrido,velocidad_media,
+					 id_evento,fecha_ingreso_participante,fecha_inicio,numero_equipo,
+					 id_automovil,id_conductor,pasar_por_boxes)
+VALUES (0,3,'00:00:00','00:00:10',0,0,1,'05-02-1925','27-04-1925',5,3,5,false);
+
+
+
+
+INSERT INTO tramo_pista(fecha_inicial,km_distancia_inicial,km_distancia_final,nombre,zona_de_boxes,fecha_final,
+						porcentaje_dificultad_curva)
+VALUES ('09-02-1923',0,1000,'Maison Blanche Inicio',false,null,0);
+
+INSERT INTO tramo_pista(fecha_inicial,km_distancia_inicial,km_distancia_final,nombre,zona_de_boxes,fecha_final,
+						porcentaje_dificultad_curva)
+VALUES ('09-02-1923',1000,1500,'Maison Blanche Curva',false,null,40);
+
+INSERT INTO tramo_pista(fecha_inicial,km_distancia_inicial,km_distancia_final,nombre,zona_de_boxes,fecha_final,
+						porcentaje_dificultad_curva)
+VALUES ('09-02-1923',1500,3500,'Maison Blanche Recta',false,null,0);
+
+
+
+INSERT INTO tramo_pista(fecha_inicial,km_distancia_inicial,km_distancia_final,nombre,zona_de_boxes,fecha_final,
+						porcentaje_dificultad_curva)
+VALUES ('09-02-1923',3500,4500,'Tertre Rouge Curva Cerrada',false,null,80);
+
+INSERT INTO tramo_pista(fecha_inicial,km_distancia_inicial,km_distancia_final,nombre,zona_de_boxes,fecha_final,
+						porcentaje_dificultad_curva)
+VALUES ('09-02-1923',4500,6000,'Tertre Rouge Recta',false,null,0);
+
+INSERT INTO tramo_pista(fecha_inicial,km_distancia_inicial,km_distancia_final,nombre,zona_de_boxes,fecha_final,
+						porcentaje_dificultad_curva)
+VALUES ('09-02-1923',6000,7000,'Tertre Rouge Curva',false,null,50);
+
+INSERT INTO tramo_pista(fecha_inicial,km_distancia_inicial,km_distancia_final,nombre,zona_de_boxes,fecha_final,
+						porcentaje_dificultad_curva)
+VALUES ('09-02-1923',7000,9000,'Hunaudieres Recta',false,null,0);
+
+INSERT INTO tramo_pista(fecha_inicial,km_distancia_inicial,km_distancia_final,nombre,zona_de_boxes,fecha_final,
+						porcentaje_dificultad_curva)
+VALUES ('09-02-1923',9000,10000,'Hunaudieres Curva',false,null,30);
+
+INSERT INTO tramo_pista(fecha_inicial,km_distancia_inicial,km_distancia_final,nombre,zona_de_boxes,fecha_final,
+						porcentaje_dificultad_curva)
+VALUES ('09-02-1923',10000,12000,'Mulsanne Curva',false,null,90);
+
+INSERT INTO tramo_pista(fecha_inicial,km_distancia_inicial,km_distancia_final,nombre,zona_de_boxes,fecha_final,
+						porcentaje_dificultad_curva)
+VALUES ('09-02-1923',12000,15000,'Arnage Curva',false,null,70);
+
+INSERT INTO tramo_pista(fecha_inicial,km_distancia_inicial,km_distancia_final,nombre,zona_de_boxes,fecha_final,
+						porcentaje_dificultad_curva)
+VALUES ('09-02-1923',15000,17262,'Arnage Recta',true,null,0);
+
+
+INSERT INTO tramo_evento(fecha_inicial,km_distancia_inicial,km_distancia_final,
+						id_evento)
+VALUES ('09-02-1923',0,1000,1);
+
+INSERT INTO tramo_evento(fecha_inicial,km_distancia_inicial,km_distancia_final,id_evento)
+VALUES ('09-02-1923',1000,1500,1);
+
+INSERT INTO tramo_evento(fecha_inicial,km_distancia_inicial,km_distancia_final,id_evento)
+VALUES ('09-02-1923',1500,3500,1);
+
+INSERT INTO tramo_evento(fecha_inicial,km_distancia_inicial,km_distancia_final,id_evento)
+VALUES ('09-02-1923',3500,4500,1);
+
+INSERT INTO tramo_evento(fecha_inicial,km_distancia_inicial,km_distancia_final,id_evento)
+VALUES ('09-02-1923',4500,6000,1);
+
+INSERT INTO tramo_evento(fecha_inicial,km_distancia_inicial,km_distancia_final,id_evento)
+VALUES ('09-02-1923',6000,7000,1);
+
+INSERT INTO tramo_evento(fecha_inicial,km_distancia_inicial,km_distancia_final,id_evento)
+VALUES ('09-02-1923',7000,9000,1);
+
+INSERT INTO tramo_evento(fecha_inicial,km_distancia_inicial,km_distancia_final,id_evento)
+VALUES ('09-02-1923',9000,10000,1);
+
+INSERT INTO tramo_evento(fecha_inicial,km_distancia_inicial,km_distancia_final,id_evento)
+VALUES ('09-02-1923',10000,12000,1);
+
+INSERT INTO tramo_evento(fecha_inicial,km_distancia_inicial,km_distancia_final,id_evento)
+VALUES ('09-02-1923',12000,15000,1);
+
+INSERT INTO tramo_evento(fecha_inicial,km_distancia_inicial,km_distancia_final,id_evento)
+VALUES ('09-02-1923',15000,17262,1);
+
+
+
+INSERT INTO pieza(id,id_pais,id_empresa,nombre,tipo,descripcion,cantidad)
+VALUES (1,1,1,'Codo escape','Otro','salida de combustion',2);
+
+INSERT INTO pieza(id,id_pais,id_empresa,nombre,tipo,combustion,cilindrada,cantidad)
+VALUES (2,1,1,'Moteur Chenard et Walker','Motor','L4','2978cc',1);
+
+
+
+
+INSERT INTO pieza_automovil(id_pieza,id_automovil,cantidad)
+VALUES (1,1,1);
+INSERT INTO pieza_automovil(id_pieza,id_automovil,cantidad)
+VALUES (2,1,1);

@@ -1,0 +1,523 @@
+
+--REPORTE 1 SOLO CON ANO DE EVENTO
+--drop function reporte1;
+CREATE OR REPLACE FUNCTION reporte1
+(  fecha_evento varchar,
+ 	nombre_categoria varchar,
+	
+	OUT	out_nombre_equipo VARCHAR,
+	OUT	out_numero_equipo int,
+	OUT	out_nacionalidad_equipo VARCHAR,
+ 
+ 	OUT	out_posicion int,
+ 	OUT	out_numero_vuelta int,
+ 	OUT	out_km_recorrido bigint,
+	
+	Out out_Nombre_Conductor VARCHAR,
+	Out out_Segundo_Nombre_Conductor VARCHAR,
+	Out out_Apellido_Conductor VARCHAR,
+	Out out_Segundo_Apellido_Conductor VARCHAR,
+	Out out_Foto_Conductor bytea,
+	Out out_Nacionalidad_Conductor  VARCHAR,
+	Out out_Nombre_Automovil VARCHAR,
+	Out out_Motor_Automovil_Nombre VARCHAR,
+	Out out_Motor_Automovil_Combustion VARCHAR,
+	Out out_Motor_Automovil_Cilindrada VARCHAR,
+	Out out_Foto_Automovil bytea,
+	Out out_Nombre_Categoria VARCHAR,
+ 
+ 	Out out_velocidad_media int,
+ 
+ 	Out out_tiempo_mejor_vuelta time
+
+                                    
+ )
+RETURNS SETOF RECORD AS
+$BODY$
+DECLARE
+    reg RECORD;
+	reg_secundarios RECORD;
+BEGIN
+     FOR REG IN SELECT 	ca.id_evento as id_evento,
+	 					ca.id_conductor as id_conductor,
+						ca.id_automovil as id_automovil,
+						ca.numero_equipo as numero_equipo,
+						ca.posicion_actual as posicion_actual,
+						ca.numero_vuelta as numero_vuelta,
+						ca.km_recorrido as km_recorrido
+						
+		
+						from evento e,carrera ca,automovil au, categoria cate
+						where to_char (e.fecha_inicio,'YYYY') = fecha_evento
+						AND e.id = ca.id_evento
+						AND ca.id_automovil = au.id
+						AND au.id_categoria= cate.id
+						AND cate.nombre = nombre_categoria
+						
+						order by ca.posicion_actual asc
+
+		
+	LOOP   
+	--TRAE EL EQUIPO 
+		out_posicion := reg.posicion_actual;
+		out_numero_vuelta := reg.numero_vuelta;
+ 		out_km_recorrido:= reg.km_recorrido/1000;
+	
+		FOR reg_secundarios IN SELECT 	e.nombre as nombre_equipo,
+									e.numero as numero_equipo,
+									pa.nacionalidad as nacionalidad_equipo
+
+									FROM equipo e,empresa em,pais pa--, conductor co, automovil au,carrera ca,carrera_detalle cade
+									WHERE e.id_empresa = em.id
+									AND em.id_pais = pa.id
+									AND e.numero = reg.numero_equipo
+										limit 1
+	 				 LOOP   
+					 	out_nombre_equipo := reg_secundarios.nombre_equipo;
+						out_numero_equipo := reg_secundarios.numero_equipo;
+						out_nacionalidad_equipo := reg_secundarios.nacionalidad_equipo;
+	   
+	  				END LOOP;
+					
+					--TRAE AL CONDUCTOR
+					FOR reg_secundarios IN SELECT co.primer_nombre as Nombre_Conductor,
+												co.segundo_nombre as Segundo_Nombre_Conductor,
+												co.primer_apellido as Apellido_Conductor,
+												co.segundo_apellido as Segundo_Apellido_Conductor,
+												co.foto as Foto_Conductor,
+												pa.nacionalidad as Nacionalidad_Conductor
+
+										FROM pais pa, conductor co --automovil au,carrera ca,carrera_detalle cade
+										WHERE co.id_pais = pa.id
+										AND co.id = reg.id_conductor
+										limit 1
+	 				 LOOP   
+					 	out_Nombre_Conductor := reg_secundarios.Nombre_Conductor;
+					 	out_Segundo_Nombre_Conductor := reg_secundarios.Segundo_Nombre_Conductor;
+					 	out_Apellido_Conductor := reg_secundarios.Apellido_Conductor;
+						out_Segundo_Apellido_Conductor := reg_secundarios.Segundo_Apellido_Conductor;
+						out_Foto_Conductor := reg_secundarios.Foto_Conductor;
+						out_Nacionalidad_Conductor  := reg_secundarios.Nacionalidad_Conductor;
+	  				END LOOP;
+					
+					
+	   			FOR reg_secundarios IN SELECT 	au.nombre as Nombre_Automovil,
+												pie.nombre as Motor_Automovil_Nombre,
+												pie.combustion as Motor_Automovil_Combustion,
+												pie.cilindrada as Motor_Automovil_Cilindrada,
+												au.foto as Foto_Automovil,
+												cate.nombre as Nombre_Categoria
+
+										FROM automovil au,categoria cate,pieza pie,pieza_automovil pa--,carrera ca,carrera_detalle cade
+										WHERE au.id_categoria = cate.id
+										AND pie.id = pa.id_pieza
+										AND au.id = reg.id_automovil
+										AND pie.tipo = 'Motor'
+										
+										limit 1
+	 				 LOOP   
+					 	out_Nombre_Automovil := reg_secundarios.Nombre_Automovil;
+					 	out_Motor_Automovil_Nombre := reg_secundarios.Motor_Automovil_Nombre;
+					 	out_Motor_Automovil_Combustion := reg_secundarios.Motor_Automovil_Combustion;
+						out_Motor_Automovil_Cilindrada := reg_secundarios.Motor_Automovil_Cilindrada;
+						out_Foto_Automovil := reg_secundarios.Foto_Automovil;
+						out_Nombre_Categoria  := reg_secundarios.Nombre_Categoria;
+	  				END LOOP;
+					
+					
+					FOR reg_secundarios IN SELECT 	posicion_actual as posicion,
+													avg(ca.velocidad_media) as velocidad_media
+													
+
+											from evento e,carrera_detalle ca
+											where to_char (e.fecha_inicio,'YYYY') = fecha_evento
+											AND ca.id_automovil = reg.id_automovil
+											AND e.id = ca.id_evento
+											AND ca.id_conductor = reg.id_conductor
+											group by posicion
+										
+										limit 1
+	 				 LOOP   
+					 	out_velocidad_media := reg_secundarios.velocidad_media;
+					 	
+	  				END LOOP;
+					
+					FOR reg_secundarios IN SELECT min(tiempo_final - tiempo_inicial) as tiempo_mejor_vuelta
+													from carrera_detalle
+													group by numero_equipo
+													having numero_equipo = reg.numero_equipo
+										
+										limit 1
+	 				 LOOP   
+					 	out_tiempo_mejor_vuelta := reg_secundarios.tiempo_mejor_vuelta;
+					 	
+	  				END LOOP;
+											
+       RETURN NEXT;
+    END LOOP;
+    RETURN;
+END
+$BODY$ LANGUAGE 'plpgsql';
+
+
+
+
+
+--REPORTE 1 SOLO CON ANO DE EVENTO
+--drop function reporte2;
+CREATE OR REPLACE FUNCTION reporte2
+(  fecha_evento varchar,
+ 	nombre_categoria varchar,
+ 	tiempo_var time,
+	
+	OUT	out_nombre_equipo VARCHAR,
+	OUT	out_numero_equipo int,
+	OUT	out_nacionalidad_equipo VARCHAR,
+ 
+ 	OUT	out_posicion int,
+ 	OUT	out_numero_vuelta int,
+ 	OUT	out_km_recorrido bigint,
+	
+	Out out_Nombre_Conductor VARCHAR,
+	Out out_Segundo_Nombre_Conductor VARCHAR,
+	Out out_Apellido_Conductor VARCHAR,
+	Out out_Segundo_Apellido_Conductor VARCHAR,
+	Out out_Foto_Conductor bytea,
+	Out out_Nacionalidad_Conductor  VARCHAR,
+	Out out_Nombre_Automovil VARCHAR,
+	Out out_Motor_Automovil_Nombre VARCHAR,
+	Out out_Motor_Automovil_Combustion VARCHAR,
+	Out out_Motor_Automovil_Cilindrada VARCHAR,
+	Out out_Foto_Automovil bytea,
+	Out out_Nombre_Categoria VARCHAR,
+ 
+ 	Out out_velocidad_media int,
+ 
+ 	Out out_tiempo_mejor_vuelta time
+	
+ )
+RETURNS SETOF RECORD AS
+$BODY$
+DECLARE
+    reg RECORD;
+	reg_secundarios RECORD;
+BEGIN
+     FOR REG IN SELECT 	ca.id_evento as id_evento,
+	 					ca.id_conductor as id_conductor,
+						ca.id_automovil as id_automovil,
+						ca.numero_equipo as numero_equipo,
+						ca.posicion_actual as posicion_actual,
+						ca.numero_vuelta as numero_vuelta,
+						ca.km_recorrido as km_recorrido
+						
+		
+						from evento e,carrera ca,automovil au, categoria cate
+						where to_char (e.fecha_inicio,'YYYY') = fecha_evento
+						AND e.id = ca.id_evento
+						AND ca.id_automovil = au.id
+						AND au.id_categoria= cate.id
+						AND cate.nombre = nombre_categoria
+						
+						order by ca.posicion_actual asc
+
+		
+	LOOP   
+	
+	
+						FOR reg_secundarios IN SELECT   ca.posicion_actual as posicion_actual,
+											ca.numero_vuelta as numero_vuelta,
+											ca.km_recorrido as km_recorrido
+
+		
+						from evento e,carrera_detalle ca,automovil au, categoria cate
+						where to_char (e.fecha_inicio,'YYYY') = fecha_evento
+						AND e.id = ca.id_evento
+						AND ca.id_automovil = au.id
+						AND au.id_categoria= cate.id
+						AND cate.nombre = nombre_categoria
+						AND tiempo_var >= ca.tiempo_final
+						
+						order by ca.tiempo_final DESC
+						LIMIT 1
+		
+						LOOP   
+							out_posicion := reg_secundarios.posicion_actual;
+							out_numero_vuelta := reg_secundarios.numero_vuelta;
+							out_km_recorrido:= reg_secundarios.km_recorrido/1000;
+						END LOOP;	
+	
+		FOR reg_secundarios IN SELECT 	e.nombre as nombre_equipo,
+									e.numero as numero_equipo,
+									pa.nacionalidad as nacionalidad_equipo
+
+									FROM equipo e,empresa em,pais pa--, conductor co, automovil au,carrera ca,carrera_detalle cade
+									WHERE e.id_empresa = em.id
+									AND em.id_pais = pa.id
+									AND e.numero = reg.numero_equipo
+										limit 1
+	 				 LOOP   
+					 	out_nombre_equipo := reg_secundarios.nombre_equipo;
+						out_numero_equipo := reg_secundarios.numero_equipo;
+						out_nacionalidad_equipo := reg_secundarios.nacionalidad_equipo;
+	   
+	  				END LOOP;
+					
+					--TRAE AL CONDUCTOR
+					FOR reg_secundarios IN SELECT co.primer_nombre as Nombre_Conductor,
+												co.segundo_nombre as Segundo_Nombre_Conductor,
+												co.primer_apellido as Apellido_Conductor,
+												co.segundo_apellido as Segundo_Apellido_Conductor,
+												co.foto as Foto_Conductor,
+												pa.nacionalidad as Nacionalidad_Conductor
+
+										FROM pais pa, conductor co --automovil au,carrera ca,carrera_detalle cade
+										WHERE co.id_pais = pa.id
+										AND co.id = reg.id_conductor
+										limit 1
+	 				 LOOP   
+					 	out_Nombre_Conductor := reg_secundarios.Nombre_Conductor;
+					 	out_Segundo_Nombre_Conductor := reg_secundarios.Segundo_Nombre_Conductor;
+					 	out_Apellido_Conductor := reg_secundarios.Apellido_Conductor;
+						out_Segundo_Apellido_Conductor := reg_secundarios.Segundo_Apellido_Conductor;
+						out_Foto_Conductor := reg_secundarios.Foto_Conductor;
+						out_Nacionalidad_Conductor  := reg_secundarios.Nacionalidad_Conductor;
+	  				END LOOP;
+					
+					
+	   			FOR reg_secundarios IN SELECT 	au.nombre as Nombre_Automovil,
+												pie.nombre as Motor_Automovil_Nombre,
+												pie.combustion as Motor_Automovil_Combustion,
+												pie.cilindrada as Motor_Automovil_Cilindrada,
+												au.foto as Foto_Automovil,
+												cate.nombre as Nombre_Categoria
+
+										FROM automovil au,categoria cate,pieza pie,pieza_automovil pa--,carrera ca,carrera_detalle cade
+										WHERE au.id_categoria = cate.id
+										AND pie.id = pa.id_pieza
+										AND au.id = reg.id_automovil
+										AND pie.tipo = 'Motor'
+										
+										limit 1
+	 				 LOOP   
+					 	out_Nombre_Automovil := reg_secundarios.Nombre_Automovil;
+					 	out_Motor_Automovil_Nombre := reg_secundarios.Motor_Automovil_Nombre;
+					 	out_Motor_Automovil_Combustion := reg_secundarios.Motor_Automovil_Combustion;
+						out_Motor_Automovil_Cilindrada := reg_secundarios.Motor_Automovil_Cilindrada;
+						out_Foto_Automovil := reg_secundarios.Foto_Automovil;
+						out_Nombre_Categoria  := reg_secundarios.Nombre_Categoria;
+	  				END LOOP;
+					
+					
+					FOR reg_secundarios IN SELECT 	posicion_actual as posicion,
+													avg(ca.velocidad_media) as velocidad_media
+													
+
+											from evento e,carrera_detalle ca
+											where to_char (e.fecha_inicio,'YYYY') = fecha_evento
+											AND ca.id_automovil = reg.id_automovil
+											AND e.id = ca.id_evento
+											AND tiempo_var >= tiempo_final
+											AND ca.id_conductor = reg.id_conductor
+											group by posicion
+										
+										limit 1
+	 				 LOOP   
+					 	out_velocidad_media := reg_secundarios.velocidad_media;
+					 	
+	  				END LOOP;
+					
+					FOR reg_secundarios IN SELECT min(tiempo_final - tiempo_inicial) as tiempo_mejor_vuelta
+													from carrera_detalle
+													
+													where tiempo_var >= tiempo_final
+													group by numero_equipo
+													having numero_equipo = reg.numero_equipo
+													
+										
+										limit 1
+	 				 LOOP   
+					 	out_tiempo_mejor_vuelta := reg_secundarios.tiempo_mejor_vuelta;
+					 	
+	  				END LOOP;
+											
+       RETURN NEXT;
+    END LOOP;
+    RETURN;
+END
+$BODY$ LANGUAGE 'plpgsql';
+
+
+
+
+
+CREATE OR REPLACE FUNCTION reporte3
+(  fecha_evento varchar,
+   nombre_categoria varchar,
+	
+	OUT	out_nombre_equipo VARCHAR,
+	OUT	out_numero_equipo int,
+	OUT	out_nacionalidad_equipo VARCHAR,
+ 
+ 	OUT	out_posicion int,
+ 	OUT	out_numero_vuelta int,
+ 	OUT	out_km_recorrido bigint,
+	
+	Out out_Nombre_Conductor VARCHAR,
+	Out out_Segundo_Nombre_Conductor VARCHAR,
+	Out out_Apellido_Conductor VARCHAR,
+	Out out_Segundo_Apellido_Conductor VARCHAR,
+	Out out_Foto_Conductor bytea,
+	Out out_Nacionalidad_Conductor  VARCHAR,
+	Out out_Nombre_Automovil VARCHAR,
+	Out out_Motor_Automovil_Nombre VARCHAR,
+	Out out_Motor_Automovil_Combustion VARCHAR,
+	Out out_Motor_Automovil_Cilindrada VARCHAR,
+	Out out_Foto_Automovil bytea,
+	Out out_Nombre_Categoria VARCHAR,
+ 
+ 	Out out_velocidad_media int,
+ 
+ 	Out out_tiempo_mejor_vuelta time
+
+                                    
+ )
+RETURNS SETOF RECORD AS
+$BODY$
+DECLARE
+    reg RECORD;
+	reg2 RECORD;
+	reg_secundarios RECORD;
+	
+	posicion_nueva integer;
+BEGIN
+--MUESTRA LAS CATEGORIAS QUE HAY POR ANO
+posicion_nueva := 1;
+    
+	
+	 FOR REG IN SELECT 	ca.id_evento as id_evento,
+	 					ca.id_conductor as id_conductor,
+						ca.id_automovil as id_automovil,
+						ca.numero_equipo as numero_equipo,
+						ca.posicion_actual as posicion_actual,
+						ca.numero_vuelta as numero_vuelta,
+						ca.km_recorrido as km_recorrido
+						
+		
+						from evento e,carrera ca,automovil au, categoria cate
+						where to_char (e.fecha_inicio,'YYYY') = fecha_evento
+						AND e.id = ca.id_evento
+						AND ca.id_automovil = au.id
+						AND au.id_categoria= cate.id
+						AND cate.nombre = nombre_categoria
+						
+						order by ca.posicion_actual asc
+
+						Limit 1
+	LOOP   
+	
+	
+	--TRAE EL EQUIPO 
+		out_posicion := posicion_nueva;
+		out_numero_vuelta := reg.numero_vuelta;
+ 		out_km_recorrido:= reg.km_recorrido/1000;
+	
+		posicion_nueva := posicion_nueva +1;	
+	
+		FOR reg_secundarios IN SELECT 	e.nombre as nombre_equipo,
+									e.numero as numero_equipo,
+									pa.nacionalidad as nacionalidad_equipo
+
+									FROM equipo e,empresa em,pais pa--, conductor co, automovil au,carrera ca,carrera_detalle cade
+									WHERE e.id_empresa = em.id
+									AND em.id_pais = pa.id
+									AND e.numero = reg.numero_equipo
+										limit 1
+	 				 LOOP   
+					 	out_nombre_equipo := reg_secundarios.nombre_equipo;
+						out_numero_equipo := reg_secundarios.numero_equipo;
+						out_nacionalidad_equipo := reg_secundarios.nacionalidad_equipo;
+	   
+	  				END LOOP;
+					
+					--TRAE AL CONDUCTOR
+					FOR reg_secundarios IN SELECT co.primer_nombre as Nombre_Conductor,
+												co.segundo_nombre as Segundo_Nombre_Conductor,
+												co.primer_apellido as Apellido_Conductor,
+												co.segundo_apellido as Segundo_Apellido_Conductor,
+												co.foto as Foto_Conductor,
+												pa.nacionalidad as Nacionalidad_Conductor
+
+										FROM pais pa, conductor co --automovil au,carrera ca,carrera_detalle cade
+										WHERE co.id_pais = pa.id
+										AND co.id = reg.id_conductor
+										limit 1
+	 				 LOOP   
+					 	out_Nombre_Conductor := reg_secundarios.Nombre_Conductor;
+					 	out_Segundo_Nombre_Conductor := reg_secundarios.Segundo_Nombre_Conductor;
+					 	out_Apellido_Conductor := reg_secundarios.Apellido_Conductor;
+						out_Segundo_Apellido_Conductor := reg_secundarios.Segundo_Apellido_Conductor;
+						out_Foto_Conductor := reg_secundarios.Foto_Conductor;
+						out_Nacionalidad_Conductor  := reg_secundarios.Nacionalidad_Conductor;
+	  				END LOOP;
+					
+					
+	   			FOR reg_secundarios IN SELECT 	au.nombre as Nombre_Automovil,
+												pie.nombre as Motor_Automovil_Nombre,
+												pie.combustion as Motor_Automovil_Combustion,
+												pie.cilindrada as Motor_Automovil_Cilindrada,
+												au.foto as Foto_Automovil,
+												cate.nombre as Nombre_Categoria
+
+										FROM automovil au,categoria cate,pieza pie,pieza_automovil pa--,carrera ca,carrera_detalle cade
+										WHERE au.id_categoria = cate.id
+										AND pie.id = pa.id_pieza
+										AND au.id = reg.id_automovil
+										AND pie.tipo = 'Motor'
+										
+										limit 1
+	 				 LOOP   
+					 	out_Nombre_Automovil := reg_secundarios.Nombre_Automovil;
+					 	out_Motor_Automovil_Nombre := reg_secundarios.Motor_Automovil_Nombre;
+					 	out_Motor_Automovil_Combustion := reg_secundarios.Motor_Automovil_Combustion;
+						out_Motor_Automovil_Cilindrada := reg_secundarios.Motor_Automovil_Cilindrada;
+						out_Foto_Automovil := reg_secundarios.Foto_Automovil;
+						out_Nombre_Categoria  := reg_secundarios.Nombre_Categoria;
+	  				END LOOP;
+					
+					
+					FOR reg_secundarios IN SELECT 	posicion_actual as posicion,
+													avg(ca.velocidad_media) as velocidad_media
+													
+
+											from evento e,carrera_detalle ca
+											where to_char (e.fecha_inicio,'YYYY') = fecha_evento
+											AND ca.id_automovil = reg.id_automovil
+											AND e.id = ca.id_evento
+											AND ca.id_conductor = reg.id_conductor
+											group by posicion
+										
+										limit 1
+	 				 LOOP   
+					 	out_velocidad_media := reg_secundarios.velocidad_media;
+					 	
+	  				END LOOP;
+					
+					FOR reg_secundarios IN SELECT min(tiempo_final - tiempo_inicial) as tiempo_mejor_vuelta
+													from carrera_detalle
+													group by numero_equipo
+													having numero_equipo = reg.numero_equipo
+										
+										limit 1
+	 				 LOOP   
+					 	out_tiempo_mejor_vuelta := reg_secundarios.tiempo_mejor_vuelta;
+					 	
+	  				END LOOP;
+											
+       RETURN NEXT;
+	   
+	   
+	   
+    END LOOP;
+    RETURN;
+END
+$BODY$ LANGUAGE 'plpgsql';

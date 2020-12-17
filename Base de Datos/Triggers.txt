@@ -1,0 +1,75 @@
+
+--drop function trigger_condicion_pista3();
+CREATE FUNCTION trigger_condicion_pista() RETURNS TRIGGER AS $$
+DECLARE
+ reg RECORD;
+ var_humedad varchar;
+BEGIN
+
+if(new.humedad = 'Alta')then
+
+			FOR REG IN SELECT  ca.pasar_por_boxes as pasar_por_boxes,
+								ca.id_conductor as id_conductor,
+								ca.id_automovil as id_automovil
+								from carrera ca
+								where ca.id_evento = 1
+
+			LOOP   
+			
+			if(reg.pasar_por_boxes = 'Salir')then
+			 
+					UPDATE carrera
+					set pasar_por_boxes = 'No'
+					WHERE id_evento = 1
+					AND id_conductor = reg.id_conductor
+					AND	id_automovil = reg.id_automovil;
+ 			else
+			UPDATE carrera
+					set pasar_por_boxes = 'Entrar'
+					WHERE id_evento = 1
+					AND id_conductor = reg.id_conductor
+					AND	id_automovil = reg.id_automovil;
+			
+			end if;
+
+			END LOOP;
+	
+	
+	
+end if;
+
+  var_humedad := (SELECT humedad from condicion_pista where id_evento = new.id_evento
+														 AND hora_final is null);
+if(var_humedad is not null)then
+-- hay un clima activo
+	if(var_humedad <> new.humedad)then
+	--si la humedad es diferente a la activa, se termina la anterior y se inserta la nueva
+					UPDATE condicion_pista
+				   set hora_final = new.hora_inicial
+				   WHERE id_evento = new.id_evento
+				   AND hora_final is null;
+				   
+				   
+				   return new;
+	end if;
+	return null;
+				   
+	else
+	
+	return new;
+			
+	end if;
+	
+	
+	
+										 
+return null;
+
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trigger_condicion_pista
+BEFORE INSERT ON condicion_pista 
+FOR EACH ROW EXECUTE PROCEDURE trigger_condicion_pista();
+ 

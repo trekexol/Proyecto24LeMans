@@ -1,0 +1,576 @@
+CREATE OR REPLACE FUNCTION calcular_velocidad
+(  	
+	var_numero_vuelta int,
+ 	var_posicion_actual int,
+ 	var_tiempo_inicial TIME,
+ 	var_tiempo_final TIME,
+ 	var_km_recorrido bigint,
+ 	var_velocidad_media int, 
+	var_id_evento bigint,
+ 	var_fecha_ingreso_participante DATE,
+ 	var_fecha_inicio DATE,
+ 	var_numero_equipo int,
+  	var_id_automovil bigint,
+ 	var_id_conductor bigint,
+
+  
+  
+ OUT OUT_km_actual int,
+ OUT OUT_velocidad_actual int,
+ OUT OUT_tiempo_inicial time,
+ OUT out_numero_vueltas int
+  )
+  				
+RETURNS SETOF record AS
+$BODY$
+DECLARE
+    reg RECORD;
+	velocidad_actual int;
+	km_actuales bigint;
+	
+	km_simulados bigint;
+	
+	velocidad_maxima int;
+	velocidad_minima int;
+	
+	porcentaje_velocidad int;
+  	boxes boolean; 
+	debe_entrar_boxes varchar; 
+	
+	
+	posicion int;
+	tamano_pista int;
+	numero_vueltas int;
+	
+	segundos_en_boxes int;
+	hora_salida_boxes time;
+BEGIN
+  
+  velocidad_maxima := (SELECT velocidad_media_maxima from automovil where id = var_id_automovil);
+  velocidad_minima := (SELECT velocidad_media_minima from automovil where id = var_id_automovil);
+  
+  km_simulados := var_km_recorrido;
+  
+  
+  while (km_simulados > 17262) loop
+   km_simulados := km_simulados - 17262;
+end loop;
+ NOTIFY mymessage, 'fired by NOTIFY';
+  
+  porcentaje_velocidad := (SELECT tp.porcentaje_dificultad_curva as porcentaje
+							from tramo_evento tr,tramo_pista tp 
+							where tr.fecha_inicial = tp.fecha_inicial	
+								AND	tr.km_distancia_inicial = tp.km_distancia_inicial	
+								AND	tr.id_evento = var_id_evento
+								AND km_simulados BETWEEN tr.km_distancia_inicial 
+								AND tr.km_distancia_final
+								LIMIT 1);
+								
+  boxes := (SELECT tp.zona_de_boxes as boxes
+							from tramo_evento tr,tramo_pista tp 
+							where tr.fecha_inicial = tp.fecha_inicial	
+								AND	tr.km_distancia_inicial = tp.km_distancia_inicial	
+								AND	tr.id_evento = var_id_evento
+								AND km_simulados BETWEEN tr.km_distancia_inicial 
+								AND tr.km_distancia_final
+								LIMIT 1);
+debe_entrar_boxes := (SELECT pasar_por_boxes
+								from carrera 
+								where 	id_evento = var_id_evento
+							  AND	id_conductor = var_id_conductor
+							  AND	id_automovil = var_id_automovil
+								LIMIT 1);		
+								
+--PREGUNTAR SI EL AUTOMOVIL ESTA EN LA ZONA DE BOXES Y SI DEBE IR								
+if((boxes is true) AND(debe_entrar_boxes = 'Entrar'))then
+	--ENTRA A BOXES EL CARRO
+	--SE CALCULA LOS SEGUNDOS QUE ESTARA EL CARRO EN BOXES
+	segundos_en_boxes :=floor(random()* (5 - 1 + 1) + 1);
+	--Para que sean 10,20,30 ... segundos
+	segundos_en_boxes :=segundos_en_boxes *10;
+	
+	OUT_velocidad_actual := 0;
+	OUT_km_actual := var_km_recorrido;
+	out_numero_vueltas := var_numero_vuelta;
+	EXECUTE format('UPDATE carrera SET  tiempo_final = %L WHERE id_automovil = %L AND 
+					   							id_conductor = %L AND 
+					   							id_evento = %L'
+					   							
+					   ,var_tiempo_final,
+					   var_id_automovil,var_id_conductor,var_id_evento);
+	
+	hora_salida_boxes := (SELECT hora_final
+								from parada
+								where var_tiempo_final between hora_inicial AND hora_final
+						  	
+								AND	id_evento = var_id_evento
+							  AND	id_conductor = var_id_conductor
+							  AND	id_automovil = var_id_automovil
+								LIMIT 1);	
+								
+	if(hora_salida_boxes is null)then
+		INSERT INTO parada(hora_inicial,hora_final,id_evento,fecha_ingreso_participante,fecha_inicio
+						  ,numero_equipo,id_automovil,id_conductor)
+		VALUES(var_tiempo_final, var_tiempo_final+ interval '10 seconds',var_id_evento,var_fecha_ingreso_participante,var_fecha_inicio
+						  ,var_numero_equipo,var_id_automovil,var_id_conductor);
+					  
+	elsif (hora_salida_boxes = var_tiempo_final) then 			
+	--LLEGO LA HORA DE SALIDA DEL AUTO DE BOXES, Y SE PROCEDE A ACTUALIZAR SU ESTADO
+	
+	 EXECUTE format('UPDATE carrera SET pasar_por_boxes = ''Salir'',tiempo_final = %L
+					     WHERE id_automovil = %L AND 
+					   							id_conductor = %L AND 
+					   							id_evento = %L'
+					   							
+					   ,var_tiempo_final,var_id_automovil,var_id_conductor,var_id_evento);
+	end if;
+	
+  
+else
+  
+  if(porcentaje_velocidad = 0) then
+--LA VELOCIDAD MINIMA SERA UN 50% AUMENTADA
+	--velocidad_minima := 
+--__________________________________________ 
+ velocidad_actual := ((velocidad_maxima-velocidad_minima) * porcentaje_velocidad)/100;
+  velocidad_minima := velocidad_minima + velocidad_actual;
+  -- TRUE para cambiar el valor minimo
+  OUT_velocidad_actual := floor(random()* (velocidad_maxima - velocidad_minima + 1) + velocidad_minima);
+  
+  else 
+  velocidad_actual := ((velocidad_maxima-velocidad_minima) * porcentaje_velocidad)/100;
+  velocidad_maxima := velocidad_maxima - velocidad_actual;
+  -- TRUE para cambiar el valor maximo
+  OUT_velocidad_actual := floor(random()* (velocidad_maxima - velocidad_minima + 1) + velocidad_minima);
+   
+  end if;
+  
+  km_actuales := var_km_recorrido  + (OUT_velocidad_actual * 10);
+  velocidad_actual := OUT_velocidad_actual;
+  OUT_km_actual := km_actuales;
+  
+  
+    tamano_pista := (SELECT max(km_distancia_final) from tramo_evento where id_evento = var_id_evento );
+	   
+	   
+	   numero_vueltas := km_actuales / tamano_pista;
+	   
+	   out_numero_vueltas := numero_vueltas;
+	 --aqui entra cuando ya el carro realiza una vuelta
+	 if (var_numero_vuelta <> numero_vueltas) then
+	 --SE INSERTA LA NUEVA VUELTA DE CARRERA DETALLE
+		INSERT INTO carrera_detalle (numero_vuelta,posicion_actual,tiempo_inicial,tiempo_final,km_recorrido,velocidad_media,
+					 id_evento,fecha_ingreso_participante,fecha_inicio,numero_equipo,
+					 id_automovil,id_conductor,pasar_por_boxes)
+					 Values (numero_vueltas,var_posicion_actual,var_tiempo_inicial,var_tiempo_final,km_actuales,
+					var_velocidad_media,
+					 var_id_evento,var_fecha_ingreso_participante,var_fecha_inicio,var_numero_equipo,
+					 var_id_automovil,var_id_conductor,'No');
+					 
+					 --ASIGNO EL TIEMPO ACTUAL AL TIEMPO INICIAL DE LA NUEVA VUELTA
+					 out_tiempo_inicial := var_tiempo_final;
+					 
+					 --ACTUALIZA EL NUEVO TIEMPO INICIAL DE LA VUELTA
+					 EXECUTE format('UPDATE carrera SET tiempo_inicial = %L  WHERE id_automovil = %L AND 
+					   							id_conductor = %L AND 
+					   							id_evento = %L'
+					   							
+					   ,var_tiempo_final,
+					   var_id_automovil,var_id_conductor,var_id_evento);
+			end if;		 
+					
+		
+		
+		EXECUTE format('UPDATE carrera SET numero_vuelta = %L,km_recorrido = 
+					   %L, tiempo_final = %L, velocidad_media = %L  WHERE id_automovil = %L AND 
+					   							id_conductor = %L AND 
+					   							id_evento = %L'
+					   							
+					   ,numero_vueltas,km_actuales,var_tiempo_final,velocidad_actual,
+					   var_id_automovil,var_id_conductor,var_id_evento);
+					   
+ 	
+		
+  
+		
+ 	
+end if;
+  
+   RETURN NEXT;
+END
+$BODY$ LANGUAGE 'plpgsql';
+
+
+
+--drop function asignar_posiciones(bigint);
+CREATE OR REPLACE FUNCTION asignar_posiciones
+(  	var_id_evento bigint,
+	
+	OUT	out_numero_vueltas int,
+ 	OUT	out_posicion_actual int,
+ 	OUT out_tiempo_inicial Time,
+	OUT out_tiempo_final Time,
+ 	OUT	out_km_recorrido bigint,
+ 
+ 	OUT OUT_nombre_pista Varchar,
+ 
+ 	OUT	out_velocidad_media int,
+ 	OUT	out_id_evento bigint,
+	
+	OUT out_fecha_ingreso Date,
+ 	OUT	out_fecha_inicio Date,
+ 
+ 	OUT	out_numero_equipo SMALLINT,
+	   
+	OUT	out_id_automovil bigint,
+	OUT	out_nombre_automovil VARCHAR,
+ 
+	OUT out_id_conductor BIGINT,
+	OUT out_primer_nombre VARCHAR,
+	OUT	out_primer_apellido VARCHAR
+ 	
+ )
+RETURNS SETOF RECORD AS
+$BODY$
+DECLARE
+    reg RECORD;
+	posicion int;
+	tamano_pista int;
+	
+	km_simulados bigint;
+	
+	numero_vueltas int;
+BEGIN
+	posicion := 1;
+     FOR REG IN SELECT  ca.posicion_actual as posicion_actual,
+						ca.tiempo_inicial as tiempo_inicial,
+						ca.tiempo_final as tiempo_final,
+						ca.km_recorrido as km_recorrido,
+						ca.velocidad_media as velocidad_media,
+						ca.id_evento as id_evento,
+						ca.fecha_ingreso_participante as fecha_ingreso,
+						ca.fecha_inicio as fecha_inicio,
+						ca.numero_equipo as numero_equipo,
+						ca.id_automovil as id_automovil,
+						au.nombre as nombre_automovil,
+
+						ca.id_conductor as id_conductor,
+						co.primer_nombre as primer_nombre,
+						co.primer_apellido as primer_apellido
+
+						from carrera ca, conductor co , automovil au
+						
+						
+						where ca.id_evento = 1
+						AND ca.id_conductor = co.id
+						AND ca.id_automovil = au.id
+						group by ca.numero_equipo,ca.km_recorrido,ca.posicion_actual,
+						ca.id_evento,
+						ca.tiempo_inicial,ca.tiempo_final,ca.tiempo_final,
+						ca.velocidad_media,ca.id_evento,ca.fecha_ingreso_participante,
+						ca.fecha_inicio,ca.numero_equipo,ca.id_automovil,
+						au.nombre,ca.id_conductor,co.primer_nombre,
+						co.primer_apellido
+						order by ca.km_recorrido desc
+	
+	LOOP   
+	
+	
+	 km_simulados := reg.km_recorrido;
+	 --CALCULA EN QUE METRO VA DE LA PISTA
+	 while (km_simulados > 17262) loop
+   km_simulados := km_simulados - 17262;
+	end loop;
+	--______________________________________________________
+	-- TRAE EL NOMBRE DEL TRAMO DE PISTA DONDE SE UBICA EL AUTO
+		OUT_nombre_pista := (SELECT tp.nombre as nombre
+							from tramo_evento tr,tramo_pista tp 
+							where tr.fecha_inicial = tp.fecha_inicial	
+								AND	tr.km_distancia_inicial = tp.km_distancia_inicial	
+								AND	tr.id_evento = reg.id_evento
+								AND km_simulados BETWEEN tr.km_distancia_inicial 
+								AND tr.km_distancia_final
+								LIMIT 1);
+	--__________________________________________________________________________
+	
+	
+    tamano_pista := (SELECT max(km_distancia_final) from tramo_evento where id_evento = var_id_evento );
+	   
+	   
+	   numero_vueltas := reg.km_recorrido / tamano_pista;
+	   
+	   out_numero_vueltas := numero_vueltas;
+	   
+	 out_tiempo_inicial := reg.tiempo_inicial;
+	     out_tiempo_final := reg.tiempo_final;
+ 	     out_km_recorrido := reg.km_recorrido;
+ 		 out_velocidad_media := reg.velocidad_media;
+ 	     out_id_evento := reg.id_evento;
+	     out_fecha_ingreso := reg.fecha_ingreso;
+ 	     out_fecha_inicio := reg.fecha_inicio;
+		 
+		 out_numero_equipo := reg.numero_equipo;
+	     out_id_automovil := reg.id_automovil;
+	     out_nombre_automovil := reg.nombre_automovil;
+		   
+		 out_id_conductor := reg.id_conductor;
+	     out_primer_nombre := reg.primer_nombre;
+	     out_primer_apellido := reg.primer_apellido;
+	   
+	   
+	   
+		out_posicion_actual := posicion;
+-- ACTUALIZAR POSICION EN LA BASE DE DATOS
+	EXECUTE format('UPDATE carrera SET posicion_actual = %L 
+		 WHERE id_automovil = %L AND 
+					   							id_conductor = %L AND 
+					   							id_evento = %L'
+				   ,posicion,reg.id_automovil,reg.id_conductor,reg.id_evento);
+
+
+		posicion := posicion + 1;
+	   
+
+	  
+	   
+       RETURN NEXT;
+    END LOOP;
+    RETURN;
+END
+$BODY$ LANGUAGE 'plpgsql';
+
+
+
+--drop function simulacion_nueva(int,time,time,bigint,int,bigint,date,date,int,bigint,bigint);
+CREATE OR REPLACE FUNCTION calcular_condicion_auto
+( 	var_tiempo_final TIME,
+ 	var_id_evento bigint,
+ 	var_fecha_ingreso_participante DATE,
+ 	var_fecha_inicio DATE,
+ 	var_numero_equipo int,
+  	var_id_automovil bigint,
+ 	var_id_conductor bigint
+  
+
+  )
+  				
+RETURNS varchar AS
+$BODY$
+DECLARE
+    
+	ocurrencia int;
+	nombre_pieza varchar;
+	
+	OUT_ocurrencia VARCHAR;
+BEGIN
+
+	
+  OUT_ocurrencia := 'Nada';
+  ocurrencia := floor(random()* (100 - 1 + 1) + 1);
+  
+  if(ocurrencia <= 79) then
+ 	OUT_ocurrencia := 'Nada';
+  
+  end if;
+  if(ocurrencia >= 80 AND ocurrencia <=85) then
+ 	OUT_ocurrencia := 'Temperatura de la Cabina';
+  end if;
+  if(ocurrencia >= 86 AND ocurrencia <=89) then
+ OUT_ocurrencia := 'Bebida del Conductor';
+  end if;
+  if(ocurrencia >= 90 AND ocurrencia <=100) then
+  --CONSULTA EL NOMBRE DE LA PIEZA QUE SE DANO AL AZAR
+	nombre_pieza:=  (SELECT p.nombre from pieza p, pieza_automovil pa 
+	  where  p.id = pa.id_pieza
+	  AND var_id_automovil = pa.id_automovil
+	  ORDER BY random() LIMIT 1);
+  
+  OUT_ocurrencia := concat('Falla en la pieza: ',nombre_pieza);
+  end if;
+ 
+ 
+
+	
+	
+ RETURN OUT_ocurrencia;
+END
+$BODY$ LANGUAGE 'plpgsql';
+
+
+
+
+
+
+
+
+--drop function simulacion_nueva(int,time,time,bigint,int,bigint,date,date,int,bigint,bigint);
+CREATE OR REPLACE FUNCTION calcular_clima_hora
+(  	
+	var_id_evento bigint,
+	var_hora_inicial time,
+	
+ 
+ OUT OUT_clima VARCHAR,
+ OUT OUT_humedad VARCHAR,
+ OUT OUT_temperatura Int,
+ OUT OUT_dia boolean
+  )
+  				
+RETURNS SETOF record AS
+$BODY$
+DECLARE
+    reg RECORD;
+	
+	humedad_temporal int;
+	
+	temperatura_temporal int;
+	
+	dia_temporal boolean;
+	
+	humedad_antigua VARCHAR;
+	
+BEGIN
+
+	dia_temporal := true;
+
+ /*	if(var_hora_inicial.hour >= 12 )then 
+	 dia_temporal := false;
+	else 
+	dia_temporal := true;
+	end if;
+	
+	OUT_dia := dia_temporal;*/
+ 
+  humedad_temporal := floor(random()* (100 - 1 + 1) + 1);
+  
+  out_temperatura := floor(random()* (32 - 14 + 1) + 14);
+  
+  if(humedad_temporal <= 50) then
+  OUT_clima := 'Soleado';
+  OUT_humedad := 'Ninguna';
+  end if;
+  if(humedad_temporal >= 51 AND humedad_temporal <=70) then
+  OUT_clima := 'Soleado';
+  OUT_humedad := 'Baja';
+  end if;
+  if(humedad_temporal >= 71 AND humedad_temporal <=90) then
+  OUT_clima := 'Nublado';
+  OUT_humedad := 'Media';
+  end if;
+  if(humedad_temporal >= 91 AND humedad_temporal <=100) then
+  OUT_clima := 'Lluvioso';
+  OUT_humedad := 'Alta';
+  end if;
+ 
+ 
+
+	execute format('INSERT INTO condicion_pista(id_evento,clima,humedad,temperatura,dia,hora_inicial)
+	VALUES (%L,%L,%L,%L,%L,%L)'
+				  ,var_id_evento,OUT_clima,OUT_humedad,OUT_temperatura,dia_temporal,var_hora_inicial);
+				  
+
+	
+ RETURN NEXT;
+END
+$BODY$ LANGUAGE 'plpgsql';
+
+
+
+
+
+
+
+
+
+
+
+--drop function traer_carrera;
+
+CREATE OR REPLACE FUNCTION traer_carrera
+(  
+ 	OUT	out_posicion_actual int,
+ 	OUT out_tiempo_inicial Time,
+	OUT out_tiempo_final Time,
+ 	OUT	out_km_recorrido int,
+ 
+ 	OUT	out_velocidad_media int,
+ 	OUT	out_id_evento bigint,
+	
+	OUT out_fecha_ingreso Date,
+ 	OUT	out_fecha_inicio Date,
+ 
+ 	OUT	out_numero_equipo SMALLINT,
+	   
+	OUT	out_id_automovil bigint,
+	OUT	out_nombre_automovil VARCHAR,
+ 
+	OUT out_id_conductor BIGINT,
+	OUT out_primer_nombre VARCHAR,
+	OUT	out_primer_apellido VARCHAR
+	
+ )
+RETURNS SETOF RECORD AS
+$BODY$
+DECLARE
+    reg RECORD;
+BEGIN
+     FOR REG IN SELECT  
+	 					ca.posicion_actual as posicion_actual,
+						ca.tiempo_inicial as tiempo_inicial,
+						ca.tiempo_final as tiempo_final,
+						ca.km_recorrido as km_recorrido,
+						ca.velocidad_media as velocidad_media,
+						ca.id_evento as id_evento,
+						ca.fecha_ingreso_participante as fecha_ingreso,
+						ca.fecha_inicio as fecha_inicio,
+						ca.numero_equipo as numero_equipo,
+						ca.id_automovil as id_automovil,
+						au.nombre as nombre_automovil,
+
+						ca.id_conductor as id_conductor,
+						co.primer_nombre as primer_nombre,
+						co.primer_apellido as primer_apellido
+
+						from carrera ca, conductor co , automovil au
+						where id_evento = 1
+						AND ca.id_conductor = co.id
+						AND ca.id_automovil = au.id
+						
+						
+	group by ca.posicion_actual,ca.id_evento,
+	ca.tiempo_inicial,ca.tiempo_final,ca.tiempo_final,ca.km_recorrido,
+	ca.velocidad_media,ca.id_evento,ca.fecha_ingreso_participante,
+	ca.fecha_inicio,ca.numero_equipo,ca.id_automovil,
+	au.nombre,ca.id_conductor,co.primer_nombre,
+	co.primer_apellido
+	LOOP   
+		 out_posicion_actual := reg.posicion_actual;
+			
+ 		 out_tiempo_inicial := reg.tiempo_inicial;
+	     out_tiempo_final := reg.tiempo_final;
+ 	     out_km_recorrido := reg.km_recorrido;
+ 		 out_velocidad_media := reg.velocidad_media;
+ 	     out_id_evento := reg.id_evento;
+	     out_fecha_ingreso := reg.fecha_ingreso;
+ 	     out_fecha_inicio := reg.fecha_inicio;
+		 
+		 out_numero_equipo := reg.numero_equipo;
+	     out_id_automovil := reg.id_automovil;
+	     out_nombre_automovil := reg.nombre_automovil;
+		   
+		 out_id_conductor := reg.id_conductor;
+	     out_primer_nombre := reg.primer_nombre;
+	     out_primer_apellido := reg.primer_apellido;
+	   
+	   
+	   
+	  
+	   
+	  
+	   
+	  
+       RETURN NEXT;
+    END LOOP;
+    RETURN;
+END
+$BODY$ LANGUAGE 'plpgsql';
