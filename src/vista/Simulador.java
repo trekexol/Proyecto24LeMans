@@ -149,13 +149,11 @@ public class Simulador extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         btnCerrar = new javax.swing.JButton();
         btnEmpezar = new javax.swing.JButton();
-        jButton8 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tabla = new javax.swing.JTable();
         etiquetaTiempo = new javax.swing.JLabel();
         btnPausa = new javax.swing.JButton();
         jButton9 = new javax.swing.JButton();
-        jButton10 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         temperatura_out = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -164,6 +162,7 @@ public class Simulador extends javax.swing.JFrame {
         humedad_out = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         condicion_txt = new javax.swing.JTextArea();
+        combohora = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
@@ -197,16 +196,6 @@ public class Simulador extends javax.swing.JFrame {
             }
         });
         jPanel1.add(btnEmpezar, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 100, 170, 40));
-
-        jButton8.setBackground(new java.awt.Color(102, 102, 255));
-        jButton8.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jButton8.setText("Condición de la Pista");
-        jButton8.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton8ActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jButton8, new org.netbeans.lib.awtextra.AbsoluteConstraints(1090, 560, 220, 40));
 
         tabla.setBackground(new java.awt.Color(204, 204, 255));
         tabla.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
@@ -284,13 +273,13 @@ public class Simulador extends javax.swing.JFrame {
 
         jButton9.setBackground(new java.awt.Color(102, 102, 255));
         jButton9.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jButton9.setText("Ver Paradas a Boxes");
-        jPanel1.add(jButton9, new org.netbeans.lib.awtextra.AbsoluteConstraints(1090, 450, 220, 40));
-
-        jButton10.setBackground(new java.awt.Color(102, 102, 255));
-        jButton10.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jButton10.setText("Ver Condicion del Auto");
-        jPanel1.add(jButton10, new org.netbeans.lib.awtextra.AbsoluteConstraints(1090, 510, 220, 40));
+        jButton9.setText("Simular horas");
+        jButton9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton9ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton9, new org.netbeans.lib.awtextra.AbsoluteConstraints(1090, 570, 220, 40));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         jLabel1.setText("Temperatura :");
@@ -319,6 +308,10 @@ public class Simulador extends javax.swing.JFrame {
 
         jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(1090, 190, 210, 240));
 
+        combohora.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        combohora.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24" }));
+        jPanel1.add(combohora, new org.netbeans.lib.awtextra.AbsoluteConstraints(1150, 490, 90, 40));
+
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1570, 910));
 
         pack();
@@ -346,9 +339,66 @@ public class Simulador extends javax.swing.JFrame {
         btnPausa.setEnabled(false);
     }//GEN-LAST:event_btnPausaActionPerformed
 
-    private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton8ActionPerformed
+    private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
+          
+         int hora = Integer.parseInt(combohora.getSelectedItem().toString());
+        Time tiempo = new Time(h,m,s);  
+        
+       
+        int minuto = 0;
+        int segundo = 0;
+        
+        if(hora == 24){
+            minuto = 59;
+            segundo = 50;
+            hora= 23;
+        }
+       
+          while((tiempo.getHours() != hora) || (tiempo.getMinutes() != minuto) ||(tiempo.getSeconds() != segundo)){
+             
+              
+             tiempo.setSeconds(tiempo.getSeconds()+10);
+             
+              System.out.println(tiempo);
+             
+            if((tiempo.getSeconds()==60)|| (tiempo.getSeconds()==10)|| (tiempo.getSeconds()==20)|| 
+                    (tiempo.getSeconds()==30)|| (tiempo.getSeconds()==40)|| (tiempo.getSeconds()==50)) 
+            { 
+                lista = carrera_conexion.calcular_velocidad_posicion(lista,tiempo);
+                
+            
+                
+               //ordena los participantes segun sus posiciones
+               lista = carrera_conexion.actualizar_posicion(tiempo);
+               
+               // calcula el clima 
+               Clima clima = new Clima();
+               clima = carrera_conexion.calcular_clima(1,tiempo);
+               clima_out.setText(clima.getClima());
+              humedad_out.setText(clima.getHumedad());
+              temperatura_out.setText(clima.getTemperatura());
+               //--------------------------------------------
+               
+               String condicion = carrera_conexion.calcular_condicion_auto(lista, tiempo);
+               condicion_txt.setText(condicion);
+               
+                llenarTabla(lista);
+               
+            }
+            if(tiempo.getSeconds()==60){
+                 tiempo.setSeconds(0);
+                tiempo.setMinutes(tiempo.getMinutes()+1);
+            }
+            if(tiempo.getMinutes()==60)
+            {
+                tiempo.setMinutes(0);
+                tiempo.setHours(tiempo.getHours()+1);
+            }
+           
+        }
+          
+       
+    }//GEN-LAST:event_jButton9ActionPerformed
 
  
     
@@ -496,11 +546,10 @@ public class Simulador extends javax.swing.JFrame {
     private javax.swing.JButton btnEmpezar;
     private javax.swing.JButton btnPausa;
     private javax.swing.JLabel clima_out;
+    private javax.swing.JComboBox<String> combohora;
     private javax.swing.JTextArea condicion_txt;
     private javax.swing.JLabel etiquetaTiempo;
     private javax.swing.JLabel humedad_out;
-    private javax.swing.JButton jButton10;
-    private javax.swing.JButton jButton8;
     private javax.swing.JButton jButton9;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
