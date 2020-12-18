@@ -421,7 +421,7 @@ public class Simulador extends javax.swing.JFrame {
                   
                     String[] row = {Integer.toString(est.getNumero_equipo()),est.getPrimer_nombre()+" "+est.getPrimer_apellido(),
                     est.getNombre_automovil(), Integer.toString(est.getNumero_vuelta()),
-                    Long.toString(est.getKm_recorrido())+"Km",Integer.toString(est.getVelocidad_media()),Integer.toString(posicion),
+                    Long.toString(est.getKm_recorrido())+"M",Integer.toString(est.getVelocidad_media()),Integer.toString(posicion),
                     est.getNombre_pista()};
                  dtm.addRow(row);
                  posicion ++;
@@ -429,18 +429,19 @@ public class Simulador extends javax.swing.JFrame {
                
                   
                tabla.setModel(dtm);
-        /*    
+        
             
          
              TableColumnModel columnModel = tabla.getColumnModel();
              
-                columnModel.getColumn(0).setPreferredWidth(20);
+               columnModel.getColumn(0).setPreferredWidth(15);
                 columnModel.getColumn(1).setPreferredWidth(150);
                 columnModel.getColumn(2).setPreferredWidth(150);
-                 columnModel.getColumn(3).setPreferredWidth(50);
-                  columnModel.getColumn(4).setPreferredWidth(150);
-                  columnModel.getColumn(5).setPreferredWidth(50);
-                  columnModel.getColumn(6).setPreferredWidth(15);*/
+                 columnModel.getColumn(3).setPreferredWidth(20);
+                  columnModel.getColumn(4).setPreferredWidth(100);
+                  columnModel.getColumn(5).setPreferredWidth(20);
+                  columnModel.getColumn(6).setPreferredWidth(15);
+                  columnModel.getColumn(7).setPreferredWidth(55);
     }catch(Exception e){
              System.out.println("ocurrio un error en tabla");
     }
@@ -487,18 +488,17 @@ public class Simulador extends javax.swing.JFrame {
                
                   
                tabla.setModel(dtm);
-        /*    
-            
-         
-             TableColumnModel columnModel = tabla.getColumnModel();
+               
+       TableColumnModel columnModel = tabla.getColumnModel();
              
-                columnModel.getColumn(0).setPreferredWidth(20);
+                columnModel.getColumn(0).setPreferredWidth(15);
                 columnModel.getColumn(1).setPreferredWidth(150);
                 columnModel.getColumn(2).setPreferredWidth(150);
-                 columnModel.getColumn(3).setPreferredWidth(50);
-                  columnModel.getColumn(4).setPreferredWidth(150);
-                  columnModel.getColumn(5).setPreferredWidth(50);
-                  columnModel.getColumn(6).setPreferredWidth(15);*/
+                 columnModel.getColumn(3).setPreferredWidth(20);
+                  columnModel.getColumn(4).setPreferredWidth(100);
+                  columnModel.getColumn(5).setPreferredWidth(20);
+                  columnModel.getColumn(6).setPreferredWidth(15);
+                  columnModel.getColumn(7).setPreferredWidth(55);
     }catch(Exception e){
              System.out.println("ocurrio un error en tabla");
     }

@@ -75,7 +75,7 @@ public class CarreraConexion {
                   llegada =  result.getString("calcular_condicion_auto");
                   
                   if(!llegada.equals("Nada")){
-                      situaciones = "La situacion del equipo "+carrera.get(i).getNumero_equipo()
+                      situaciones = situaciones+ "\nLa situacion del equipo "+carrera.get(i).getNumero_equipo()
                               +" es "+llegada;
                   }
                 

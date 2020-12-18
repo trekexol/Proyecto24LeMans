@@ -433,7 +433,7 @@ CONSTRAINT fk_condicion_carrera_participante foreign key (id_evento,fecha_ingres
 create table accidente
 (
 
-id bigint NOT NULL,
+id SERIAL NOT NULL,
 
 km_posicion integer NOT NULL,
 hora time NOT NULL,

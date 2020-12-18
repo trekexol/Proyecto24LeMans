@@ -73,3 +73,72 @@ CREATE TRIGGER trigger_condicion_pista
 BEFORE INSERT ON condicion_pista 
 FOR EACH ROW EXECUTE PROCEDURE trigger_condicion_pista();
  
+
+
+
+
+
+--drop function trigger_condicion_pista3();
+CREATE FUNCTION trigger_accidente() RETURNS TRIGGER AS $$
+DECLARE
+ reg RECORD;
+ km_simulados bigint;
+ km_actualizados bigint;
+BEGIN
+km_actualizados := new.km_recorrido;
+while (km_actualizados > 17262) loop
+   km_actualizados := km_actualizados - 17262;
+end loop;
+
+FOR REG IN SELECT  	ca.km_recorrido as km_recorrido,
+					ca.id_automovil as id_automovil,
+					ca.id_conductor as id_conductor,
+					ca.numero_equipo as numero_equipo,
+					ca.fecha_ingreso_participante as fecha_ingreso_participante,
+					ca.fecha_inicio as fecha_inicio
+								from carrera ca
+								where ca.id_evento = new.id_evento
+								AND ca.id_conductor <> new.id_conductor
+								AND ca.id_automovil <> new.id_automovil
+								AND ca.numero_equipo <> new.numero_equipo
+
+			LOOP   
+km_simulados := reg.km_recorrido;
+ while (km_simulados > 17262) loop
+   km_simulados := km_simulados - 17262;
+end loop;
+
+
+
+--AMBOS METROS FUERON TRANFORMADOS A METROS DE LA PISTA 
+if(km_actualizados = km_simulados)then
+
+	--OCURRIO UN CHOQUE, PASAMOS A REGISTRARLO EN LA TABLA ACCIDENTE PARA AMBOS AUTOS
+	INSERT INTO accidente(km_posicion,hora,tiempo_duracion_slow_zone,distancia_slow_zone,velocidad_pos_dano,
+						 id_evento,id_automovil,id_conductor,numero_equipo,fecha_ingreso_participante,
+						  fecha_inicio)
+	VALUES(km_actualizados,new.tiempo_final,20,500,70,
+		  new.id_evento,new.id_automovil,new.id_conductor,new.numero_equipo,new.fecha_ingreso_participante,
+						  new.fecha_inicio);
+						  
+	INSERT INTO accidente(km_posicion,hora,tiempo_duracion_slow_zone,distancia_slow_zone,velocidad_pos_dano,
+						 id_evento,id_automovil,id_conductor,numero_equipo,fecha_ingreso_participante,
+						  fecha_inicio)
+	VALUES(km_actualizados,new.tiempo_final,20,500,70,
+		  new.id_evento,reg.id_automovil,reg.id_conductor,reg.numero_equipo,reg.fecha_ingreso_participante,
+						  reg.fecha_inicio);
+end if;
+
+  END LOOP;
+  
+return new;
+	
+	
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trigger_accidente
+BEFORE UPDATE ON carrera
+FOR EACH ROW EXECUTE PROCEDURE trigger_accidente();
+ 
